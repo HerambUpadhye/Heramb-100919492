@@ -1,20 +1,19 @@
-# Use official Node.js runtime as a base image
+# Use official Node.js runtime
 FROM node:20-slim
 
 # Set working directory
 WORKDIR /usr/src/app
 
-# Copy dependency files
+# Copy package files and install dependencies
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install --production
 
-# Copy all application code
+# Copy application code
 COPY . .
 
-# Expose Cloud Run–compatible port
+# Expose Cloud Run port
 EXPOSE 8080
 
-# Start the Node.js app
+# Start app
 CMD ["node", "index.js"]
+
