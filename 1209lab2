@@ -1,26 +1,24 @@
 # (Replace 'node:20-slim' with your actual base image, e.g., python:3.10-slim)
-FROM node:20-slim 
+FROM node:20-slim
 
 # 1. Set the working directory
 WORKDIR /usr/src/app
 
 # 2. Copy dependency files (for Node.js, this is package.json)
-# If you are using Python, this would be requirements.txt
 COPY package*.json ./
 
 # 3. Install dependencies
-RUN npm install 
-# If Python: RUN pip install -r requirements.txt
+# Using --production flag often saves space, but for a simple lab environment, this is fine
+RUN npm install
 
 # 4. Copy the rest of the application files, including your server startup file
 COPY . .
 
-# 5. Optional but good practice: tell the image which port to expect (Cloud Run ignores this, but it helps humans/local testing)
-# Cloud Run automatically sets the PORT environment variable to 8080 or another assigned port.
-# Your code MUST read process.env.PORT
-EXPOSE 8080 
+# 5. Optional but good practice: tell the image which port to expect
+# EXPOSE helps humans and local tools, but Cloud Run uses the runtime PORT env var.
+EXPOSE 8080
 
-# 6. Define the command to run your application. This MUST be the last instruction.
-# Ensure 'npm start' or 'node server.js' runs the code that binds to 0.0.0.0:$PORT
-CMD [ "npm", "start" ]
-# If Python/Flask: CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
+# 6. Define the command to run your application.
+# **CRITICAL CHANGE:** Execute 'node index.js' directly instead of using 'npm start'.
+# This avoids the 'npm' wrapper script, making the process cleaner and more responsive.
+CMD [ "node", "index.js" ]
