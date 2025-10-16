@@ -4,7 +4,7 @@ services:
   server:
     build:
       context: .
-      dockerfile: 1209lab1
+      dockerfile: 1209lab2
     environment:
       NODE_ENV: production
       POSTGRES_HOST: db
