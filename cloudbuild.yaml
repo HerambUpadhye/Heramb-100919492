@@ -1,19 +1,17 @@
 steps:
 # 1. BUILD the Docker image for the 'server' component
-#    - Uses the Docker builder image.
-#    - Tags the image with the Artifact Registry path and the unique $COMMIT_SHA.
+#    - Note the '-f 1209lab2' to use your custom Dockerfile name.
 - name: 'gcr.io/cloud-builders/docker'
   id: Build-Image-Server
   args:
   - 'build'
   - '-t'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/app:$COMMIT_SHA'
-  - '-f' # Specify the custom Dockerfile name
+  - '-f'
   - '1209lab2'
-  - '.' # Build context is the current directory
+  - '.'
 
 # 2. PUSH the Docker image to Artifact Registry
-#    - Uses the Docker builder image to push the tagged image.
 - name: 'gcr.io/cloud-builders/docker'
   id: Push-Image-Server
   args:
@@ -21,20 +19,20 @@ steps:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/app:$COMMIT_SHA'
 
 # 3. DEPLOY the new image to Cloud Run (Continuous Deployment)
-#    - Uses the gcloud builder image.
-#    - Deploys the newly pushed image to the Cloud Run service named 'lab-2-server'.
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Deploy-to-Cloud-Run
   args:
   - 'run'
   - 'deploy'
-  - 'lab-2-server' # <-- Change this if your Cloud Run service name is different!
+  - 'lab-2-server' # <-- Change this to your Cloud Run service name!
   - '--image'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/app:$COMMIT_SHA'
   - '--region'
   - 'us-central1'
   - '--platform'
   - 'managed'
-  - '--allow-unauthenticated' # Set this based on your assignment needs
-  # The database-related '--set-env-vars' argument has been completely removed.
-timeout: '1600s'
+  - '--allow-unauthenticated' # Set as needed for public access
+
+# REQUIRED FOR ASSIGNMENT 2 (AND FIXES YOUR ERROR)
+options:
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
