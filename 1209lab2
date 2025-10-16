@@ -1,24 +1,18 @@
-# (Replace 'node:20-slim' with your actual base image, e.g., python:3.10-slim)
+# 1209lab2
 FROM node:20-slim
 
-# 1. Set the working directory
+# Create app directory
 WORKDIR /usr/src/app
 
-# 2. Copy dependency files (for Node.js, this is package.json)
+# Install dependencies
 COPY package*.json ./
+RUN npm install --omit=dev
 
-# 3. Install dependencies
-# Using --production flag often saves space, but for a simple lab environment, this is fine
-RUN npm install
-
-# 4. Copy the rest of the application files, including your server startup file
+# Copy application files
 COPY . .
 
-# 5. Optional but good practice: tell the image which port to expect
-# EXPOSE helps humans and local tools, but Cloud Run uses the runtime PORT env var.
+# Cloud Run will set the PORT env variable
 EXPOSE 8080
 
-# 6. Define the command to run your application.
-# **CRITICAL CHANGE:** Execute 'node index.js' directly instead of using 'npm start'.
-# This avoids the 'npm' wrapper script, making the process cleaner and more responsive.
+# Start the server
 CMD [ "node", "index.js" ]

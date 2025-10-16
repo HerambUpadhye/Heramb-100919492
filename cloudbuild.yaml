@@ -1,8 +1,7 @@
 steps:
-# 1. BUILD the Docker image for the 'server' component
-#    - Note the '-f 1209lab2' to use your custom Dockerfile name.
+# 1. Build Docker image
 - name: 'gcr.io/cloud-builders/docker'
-  id: Build-Image-Server
+  id: Build-Image
   args:
   - 'build'
   - '-t'
@@ -11,28 +10,27 @@ steps:
   - '1209lab2'
   - '.'
 
-# 2. PUSH the Docker image to Artifact Registry
+# 2. Push image to Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
-  id: Push-Image-Server
+  id: Push-Image
   args:
   - 'push'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/app:$COMMIT_SHA'
 
-# 3. DEPLOY the new image to Cloud Run (Continuous Deployment)
+# 3. Deploy to Cloud Run
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Deploy-to-Cloud-Run
   args:
   - 'run'
   - 'deploy'
-  - 'lab-2-server' # <-- Change this to your Cloud Run service name!
+  - 'lab-2-server'
   - '--image'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/app:$COMMIT_SHA'
   - '--region'
   - 'us-central1'
   - '--platform'
   - 'managed'
-  - '--allow-unauthenticated' # Set as needed for public access
+  - '--allow-unauthenticated'
 
-# REQUIRED FOR ASSIGNMENT 2 (AND FIXES YOUR ERROR)
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
