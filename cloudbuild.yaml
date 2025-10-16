@@ -1,5 +1,5 @@
 steps:
-# 1. Build the Docker image
+# 1. Build Docker image
 - name: 'gcr.io/cloud-builders/docker'
   id: Build-Image
   args:
@@ -8,20 +8,20 @@ steps:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/cafe-website:$COMMIT_SHA'
   - '.'
 
-# 2. Push the image to Artifact Registry
+# 2. Push Docker image (must match the tag used in build!)
 - name: 'gcr.io/cloud-builders/docker'
   id: Push-Image
   args:
   - 'push'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/static-site-repo/cafe-website:$COMMIT_SHA'
 
-# 3. Deploy the container to Cloud Run
+# 3. Deploy to Cloud Run using the exact same image
 - name: 'gcr.io/cloud-builders/gcloud'
   id: Deploy-to-Cloud-Run
   args:
   - 'run'
   - 'deploy'
-  - 'cafe-website' # name of your Cloud Run service
+  - 'cafe-website'
   - '--image'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/static-site-repo/cafe-website:$COMMIT_SHA'
   - '--region'
