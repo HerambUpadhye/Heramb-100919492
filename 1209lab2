@@ -1,28 +1,26 @@
-# 1. Use the node:19.7.0-alpine base image
-FROM node:19.7.0-alpine
+# (Replace 'node:20-slim' with your actual base image, e.g., python:3.10-slim)
+FROM node:20-slim 
 
-# 2. Set the environment variable NODE_ENV with a value of production
-ENV NODE_ENV=production
+# 1. Set the working directory
+WORKDIR /usr/src/app
 
-# 3. Create a new directory in root called labone
-RUN mkdir /labone \
-    # a. Change the ownership to the node user and node group
-    && chown -R node:node /labone
+# 2. Copy dependency files (for Node.js, this is package.json)
+# If you are using Python, this would be requirements.txt
+COPY package*.json ./
 
-# b. Set this new folder as the working directory
-WORKDIR /labone
+# 3. Install dependencies
+RUN npm install 
+# If Python: RUN pip install -r requirements.txt
 
-# 4. Set the user to node
-USER node
+# 4. Copy the rest of the application files, including your server startup file
+COPY . .
 
-# 5. Copy all source files and change ownership to node user and node group
-COPY --chown=node:node . .
+# 5. Optional but good practice: tell the image which port to expect (Cloud Run ignores this, but it helps humans/local testing)
+# Cloud Run automatically sets the PORT environment variable to 8080 or another assigned port.
+# Your code MUST read process.env.PORT
+EXPOSE 8080 
 
-# 6. Run npm install to install node.js packages
-RUN npm install
-
-# 7. Expose port 3000
-EXPOSE 3000
-
-# 8. Set default execution command
-CMD ["node", "src/index.js"]
+# 6. Define the command to run your application. This MUST be the last instruction.
+# Ensure 'npm start' or 'node server.js' runs the code that binds to 0.0.0.0:$PORT
+CMD [ "npm", "start" ]
+# If Python/Flask: CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]
