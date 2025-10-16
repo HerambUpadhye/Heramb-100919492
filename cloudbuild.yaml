@@ -5,7 +5,7 @@ steps:
   args:
     - 'build'
     - '-t'
-    - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-repo/my-node-app:$COMMIT_SHA'
+    - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/my-node-app:$COMMIT_SHA'
     - '.'
 
 # 2️⃣ Push image to Artifact Registry
@@ -13,7 +13,7 @@ steps:
   id: Push-Image
   args:
     - 'push'
-    - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-repo/my-node-app:$COMMIT_SHA'
+    - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/my-node-app:$COMMIT_SHA'
 
 # 3️⃣ Deploy to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -24,7 +24,7 @@ steps:
     - 'deploy'
     - 'my-node-service'   # Cloud Run service name
     - '--image'
-    - 'us-central1-docker.pkg.dev/$PROJECT_ID/my-repo/my-node-app:$COMMIT_SHA'
+    - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/my-node-app:$COMMIT_SHA'
     - '--region'
     - 'us-central1'
     - '--platform'
