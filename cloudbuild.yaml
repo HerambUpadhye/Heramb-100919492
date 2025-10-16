@@ -8,27 +8,25 @@ steps:
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/cafe-website:$COMMIT_SHA'
   - '.'
 
-# 2. Push Docker image (must match the tag used in build!)
+# 2. Push Docker image to Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   id: Push-Image
   args:
   - 'push'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/cafe-website:$COMMIT_SHA'
 
-# 3. Deploy to Cloud Run using the exact same image
-- name: 'gcr.io/cloud-builders/gcloud'
+# 3. Deploy to Cloud Run using cloud-sdk container
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   id: Deploy-to-Cloud-Run
+  entrypoint: 'bash'
   args:
-  - 'run'
-  - 'deploy'
-  - 'cafe-website'
-  - '--image'
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/cafe-website:$COMMIT_SHA'
-  - '--region'
-  - 'us-central1'
-  - '--platform'
-  - 'managed'
-  - '--allow-unauthenticated'
+  - '-c'
+  - |
+    gcloud run deploy cafe-website \
+      --image us-central1-docker.pkg.dev/$PROJECT_ID/heramb-100919492/cafe-website:$COMMIT_SHA \
+      --region us-central1 \
+      --platform managed \
+      --allow-unauthenticated
 
 options:
   defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
