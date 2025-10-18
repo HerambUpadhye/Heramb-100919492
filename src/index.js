@@ -1,39 +1,50 @@
-const express = require('express');
+// index.js
+// Minimal Express server for Cloud Run: serves index.html and exposes health checks.
+
+const express = require("express");
+const path = require("path");
+
 const app = express();
-// Remove DB dependencies if you don't want DB
-// const db = require('./persistence');
-const getItems = require('./routes/getItems');
-const addItem = require('./routes/addItem');
-const updateItem = require('./routes/updateItem');
-const deleteItem = require('./routes/deleteItem');
 
-app.use(express.json());
-app.use(express.static(__dirname + '/static'));
-
-// Routes
-app.get('/items', getItems);
-app.post('/items', addItem);
-app.put('/items/:id', updateItem);
-app.delete('/items/:id', deleteItem);
-
-// Health endpoints (optional, useful for Cloud Run)
-app.get('/healthz', (req, res) => res.status(200).send('OK'));
-app.get('/readyz', (req, res) => res.status(200).send('READY'));
-
-// Use Cloud Run PORT environment variable
+// Cloud Run provides PORT; default to 8080 for local/dev.
 const PORT = process.env.PORT || 8080;
-const HOST = '0.0.0.0';
+const HOST = "0.0.0.0";
 
-app.listen(PORT, HOST, () => {
-  console.log(`✅ Server running on ${HOST}:${PORT}`);
+// Basic request logging (useful during troubleshooting)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
 });
 
-// Graceful shutdown
-const gracefulShutdown = () => {
-  console.log('⚠️ Shutting down gracefully...');
-  process.exit(0);
-};
+// Serve any static assets if you later add a /public folder
+// e.g., /public/styles.css -> https://<service>/styles.css
+app.use(express.static(path.join(__dirname, "public")));
 
-['SIGINT', 'SIGTERM', 'SIGUSR2'].forEach(sig => {
-  process.on(sig, gracefulShutdown);
+// Root route -> send the provided index.html at repo root
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Liveness & readiness probes (handy for Cloud Run)
+app.get("/health", (req, res) => res.status(200).send("ok"));
+app.get("/ready", (req, res) => res.status(200).send("ready"));
+
+// Start the server
+const server = app.listen(PORT, HOST, () => {
+  console.log(`Server listening on http://${HOST}:${PORT}`);
+});
+
+// Graceful shutdown (Cloud Run sends SIGTERM on revision stop)
+process.on("SIGTERM", () => {
+  console.log("Received SIGTERM, shutting down gracefully...");
+  server.close(() => {
+    console.log("HTTP server closed.");
+    process.exit(0);
+  });
+
+  // Force-exit if not closed in time
+  setTimeout(() => {
+    console.error("Forcing shutdown.");
+    process.exit(1);
+  }, 10000);
 });

@@ -1,19 +1,19 @@
-# Use official Node.js runtime
+# Use an LTS Node
 FROM node:20-slim
 
-# Set working directory
+# Improve runtime behavior
+ENV NODE_ENV=production
 WORKDIR /usr/src/app
 
-# Copy package files and install dependencies
+# Install prod deps
 COPY package*.json ./
-RUN npm install --production
+RUN npm ci --omit=dev
 
-# Copy application code
+# Copy the rest of the app (NOTE: copies root, not src/)
 COPY . .
 
-# Expose Cloud Run port
+# Cloud Run expects the app to listen on $PORT (defaults to 8080)
 EXPOSE 8080
 
-# Start app
+# Start the server
 CMD ["node", "index.js"]
-
